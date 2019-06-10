@@ -14,7 +14,7 @@ class TodoView(APIView):
 
     def get(self, request, format=None):
         try:
-            todos = Todo.objects.all()
+            todos = Todo.objects.all().order_by('-id')
             serialized_todos = TodoSerializer(todos, many=True)
             return Response({
                 "todos" : serialized_todos.data,
@@ -79,13 +79,14 @@ class TodoExtraView(APIView):
         id = request.GET.get('id')
         try:
             todo = Todo.objects.get(id=id)
-            todo.completed = True
+            todo.completed = not todo.completed
             todo.save()
             serialized_todo = TodoSerializer(todo, many=False)
             return Response({
                 "todo" : serialized_todo.data,
                 }, status=status.HTTP_200_OK)
         except Exception as e:
+            # print(e)
             return Response({
                 "Error" : "ToDo doesn't exists with given Id."
             }, status=status.HTTP_400_BAD_REQUEST)
